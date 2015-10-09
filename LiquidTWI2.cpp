@@ -11,6 +11,8 @@
 
   Compatible with Adafruit I2C LCD backpack (MCP23008) and
   Adafruit RGB LCD Shield
+  
+  Updated version for speed used with wire lib
 */
 
 #include <stdio.h>
