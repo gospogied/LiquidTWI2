@@ -6,7 +6,12 @@
 
 // for memory-constrained projects, comment out the MCP230xx that doesn't apply
 #define MCP23017 // Adafruit RGB LCD (PANELOLU2 is now supported without additional define)
-#define MCP23008 // Adafruit I2C Backpack
+//#define MCP23008   // Adafruit I2C Backpack
+
+// for setMCPType()
+#define LTI_TYPE_MCP23008 0
+#define LTI_TYPE_MCP23017 1
+#define DEFAULT_TYPE LTI_TYPE_MCP23017
 
 // if DETECT_DEVICE is enabled, then when constructor's detectDevice != 0
 // device will be detected in the begin() function...
@@ -14,6 +19,8 @@
 // device in any of the other functions... this allows you to compile the
 // code w/o an LCD installed, and not get hung in the write functions
 #define DETECT_DEVICE // enable device detection code
+
+#define WIRE_FREQU 100000 // 100000-400000
 
 // for setBacklight() with MCP23017
 #define OFF 0x0
@@ -41,7 +48,9 @@
 // (the Panelolu2 encoder bits are subset of these bits)
 #define ALL_BUTTON_BITS (BUTTON_UP|BUTTON_DOWN|BUTTON_LEFT|BUTTON_RIGHT|BUTTON_SELECT)
 
-#define MCP23008_ADDRESS 0x20
+#define MCP23008_ADDRESS 0x27
+#define MCP23008_IOCON_def 0x05  // (IOCON)
+#define MCP23008_SEQOP 0x20      // switch off auto increment
 
 // registers
 #define MCP23008_IODIR 0x00
@@ -57,6 +66,40 @@
 #define MCP23008_OLAT 0x0A
 
 #define MCP23017_ADDRESS 0x20
+
+#define TWI2X
+
+#ifdef TWI2X
+// control register before bankswitch
+#define MCP23017_IOCONB_def 0x0B
+
+// registers after Bankswitch
+#define MCP23017_IODIRA 0x00   // 0x00
+#define MCP23017_IPOLA  0x01   // 0x02
+#define MCP23017_GPINTENA 0x02 // 0x04
+#define MCP23017_DEFVALA 0x03  // 0x06
+#define MCP23017_INTCONA 0x04  // 0x08
+#define MCP23017_IOCONA 0x05   // 0x0A
+#define MCP23017_GPPUA 0x06    // 0x0C
+#define MCP23017_INTFA 0x07    // 0x0E
+#define MCP23017_INTCAPA 0x08  // 0x10
+#define MCP23017_GPIOA 0x09    // 0x12
+#define MCP23017_OLATA 0x0A    // 0x14
+
+
+#define MCP23017_IODIRB 0x10   // 0x01
+#define MCP23017_IPOLB 0x11    // 0x03
+#define MCP23017_GPINTENB 0x12 // 0x05
+#define MCP23017_DEFVALB 0x13 // 0x07
+#define MCP23017_INTCONB 0x14  // 0x09
+#define MCP23017_IOCONB 0x15   // 0x0B
+#define MCP23017_GPPUB 0x16    // 0x0D
+#define MCP23017_INTFB 0x17    // 0x0F
+#define MCP23017_INTCAPB 0x18  // 0x11
+#define MCP23017_GPIOB 0x19    // 0x13
+#define MCP23017_OLATB 0x1A    // 0x15
+
+#else / default settings with auto increment of registerupdate
 
 // registers
 #define MCP23017_IODIRA 0x00
@@ -83,6 +126,9 @@
 #define MCP23017_INTCAPB 0x11
 #define MCP23017_GPIOB 0x13
 #define MCP23017_OLATB 0x15
+
+
+#endif
 
 // commands
 #define LCD_CLEARDISPLAY   0x01
@@ -116,17 +162,13 @@
 #define LCD_MOVELEFT 0x00
 
 // flags for function set
-//we only support 4-bit mode #define LCD_8BITMODE 0x10
+//we only support 4-bit mode 
+#define LCD_8BITMODE 0x10
 #define LCD_4BITMODE 0x00
 #define LCD_2LINE 0x08
 #define LCD_1LINE 0x00
 #define LCD_5x10DOTS 0x04
 #define LCD_5x8DOTS 0x00
-
-// for setMCPType()
-#define LTI_TYPE_MCP23008 0
-#define LTI_TYPE_MCP23017 1
-#define DEFAULT_TYPE LTI_TYPE_MCP23008
 
 class LiquidTWI2 : public Print {
 public:
@@ -152,39 +194,41 @@ public:
 	void rightToLeft();
 	void autoscroll();
 	void noAutoscroll();
-
 	void setBacklight(uint8_t status); 
-
 	void createChar(uint8_t, uint8_t[]);
 	void setCursor(uint8_t, uint8_t); 
+
 #if defined(ARDUINO) && (ARDUINO >= 100) // scl
 	virtual size_t write(uint8_t);
 #else
 	virtual void write(uint8_t);
 #endif
+
+	virtual size_t write(uint8_t *, uint8_t );
 	void command(uint8_t);
 #ifdef MCP23017
 	uint8_t readButtons();
   //check registers
-  uint8_t readRegister(uint8_t);
+     uint8_t readRegister(uint8_t);
   //set registers
   void setRegister(uint8_t, uint8_t);
   //make some noise
-  void buzz(long,uint16_t);
+     void buzz(long,uint16_t);
 #endif
 	void setMCPType(uint8_t mcptype) {
-#if defined(MCP23017)&&defined(MCP23008)
-	  _mcpType = mcptype;
-#endif //defined(MCP23017)&&defined(MCP23008)
+#if defined(MCP23017)&& defined(MCP23008)
+	_mcpType = mcptype;
+#endif //defined(MCP23017)&& defined(MCP23008)
 	}
+     void setClock(uint32_t);
 
 
 private:
-	void send(uint8_t, uint8_t);
+	void send(uint8_t,uint8_t);
+
 #ifdef MCP23017
 	void burstBits16(uint16_t);
 	void burstBits8b(uint8_t);
-	//void burstBits8a(uint8_t);
 #endif
 #ifdef MCP23008
 	void burstBits8(uint8_t);
