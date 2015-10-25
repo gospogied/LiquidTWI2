@@ -3,6 +3,8 @@ LiquidTWI2
 
 A lean, high speed I2C LCD Library for Arduino, which supports MCP23008 (Adafruit LCD Backpack) and MCP23017 (Adafruit RGB LCD Shield)
 
+hacked by Eigil Oedegaard October 2015
+from
 hacked by Sam C. Lin / http://www.lincomatic.com
 from 
   LiquidTWI by Matt Falcon (FalconFour) / http://falconfour.com
@@ -10,6 +12,8 @@ from
   Panelolu2 support by Tony Lock / http://blog.think3dprint3d.com
   Panelolu2 integration by Robert F-C / https://github.com/buildrob
   enhancements by Nick Sayer / https://github.com/nsayer
+
+  enhancements was made (October 2015) by Eigil Oedegaard to make a higher throughput
 
 Compatible with Adafruit I2C LCD backpack (MCP23008) and
 Adafruit RGB LCD Shield (and optionally, Panelolu2)
@@ -20,9 +24,11 @@ For more information see
  Panelolu2 usage see
  http://blog.think3dprint3d.com/2012/12/mcp23017-i2c.html
 
-  Version 1.2.6
+  Version 1.2.7-beta
 
   Changelog:
+  * 1.2.7-beta 20151025 EO 
+  driver is rewritten for better throughput with Wire Library
 
   * 1.2.6 / 20140220 SCL
   added device detected guard to home() & buzz()
