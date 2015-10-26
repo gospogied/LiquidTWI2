@@ -104,7 +104,7 @@ LiquidTWI2::LiquidTWI2(uint8_t i2cAddr,uint8_t detectDevice, uint8_t backlightIn
   _i2cAddr = i2cAddr; // transfer this function call's number into our internal class state
   _displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS; // in case they forget to call begin() at least we have something
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   _mcpType = DEFAULT_TYPE; // default
 #endif
 }
@@ -126,9 +126,8 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif
 
 #ifdef MCP23017
-
     // Change register bank + SEQOP for multibyte transfer
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
     wiresend(MCP23017_IOCONB_def);
     wiresend(0xA0);  // Set BANK 1 register bank
     result = Wire.endTransmission();    
@@ -142,7 +141,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif
 
     // now set up input/output pins
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
     wiresend(MCP23017_IODIRA);
     wiresend(0x1F); // buttons input, all others output
     result = Wire.endTransmission();
@@ -156,7 +155,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif 
     
     // set the button pullups
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
     wiresend(MCP23017_GPPUA);
     wiresend(0x1F);	
     result = Wire.endTransmission();
@@ -169,7 +168,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     }
 #endif 
     
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
     wiresend(MCP23017_IODIRB);
     wiresend(0x00); // all pins output
     result = Wire.endTransmission();
@@ -183,13 +182,13 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif 
 #endif // MCP23017
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
   else { // MCP23008
 #endif
 #ifdef MCP23008
     // first thing we do is to get the GPIO expander's head working straight, with a boatload of default settings.
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23008_ADDRESS | _i2cAddr);
     wiresend(MCP23008_IODIR);
     wiresend(0xFF);
     wiresend(0x00);
@@ -211,9 +210,8 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     }
 #endif 
 	  
-
     // Now switch off sequential mode
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23008_ADDRESS | _i2cAddr);
     wiresend(MCP23008_IOCON);
     wiresend(MCP23008_SEQOP); // set  SEQ bit
     result = Wire.endTransmission();
@@ -227,7 +225,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif 
 
     // now we set the GPIO expander's I/O direction to output since it's soldered to an LCD output.
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23008_ADDRESS | _i2cAddr);
     wiresend(MCP23008_IODIR);
     wiresend(0x00); // all output: 00000000 for pins 1...8
     result = Wire.endTransmission();
@@ -241,7 +239,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif 
 #endif // MCP23008
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
 #endif
 
@@ -269,7 +267,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   //  the arduino, so we have to perform a software reset as per page 45
   //  of the HD44780 datasheet - (kch)
   //-----
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   if (_mcpType == LTI_TYPE_MCP23017) {
 #endif // defined(MCP23017)&& defined(MCP23008)
 
@@ -292,7 +290,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     burstBits8b(M17_BIT_D5 >> 8);
 #endif // MCP23017
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
   else {
 #endif // defined(MCP23017)&&defined(MCP23008)
@@ -313,7 +311,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     burstBits8(B10010000); // send D4 low and LITE D5 high with !enable
 #endif // MCP23008
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
 #endif
 
@@ -514,11 +512,11 @@ uint8_t LiquidTWI2::readButtons(void) {
 #ifdef DETECT_DEVICE
   if (!_deviceDetected) return 0;
 #endif
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(MCP23017_GPIOA);	
   Wire.endTransmission();
   
-  Wire.requestFrom(_i2cAddr  | _i2cAddr, 1);
+  Wire.requestFrom(MCP23017_ADDRESS | _i2cAddr, 1);
   return ~wirerecv() & ALL_BUTTON_BITS;
 }
 #endif // MCP23017
@@ -529,7 +527,7 @@ void LiquidTWI2::setBacklight(uint8_t status) {
   if (!_deviceDetected) return;
 #endif
   if (_backlightInverted) status ^= 0x7;
-#if defined(MCP23017)&&defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   if (_mcpType == LTI_TYPE_MCP23017) {
 #endif
 #ifdef MCP23017
@@ -542,7 +540,7 @@ void LiquidTWI2::setBacklight(uint8_t status) {
     burstBits16(_backlightBits);
 #endif // MCP23017
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
   else {
 #endif
@@ -557,13 +555,13 @@ void LiquidTWI2::setBacklight(uint8_t status) {
 
 // write either command or data, burst it to the expander over I2C.
 void LiquidTWI2::send(uint8_t value, uint8_t mode) {
-#if defined(MCP23017)&&defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   if (_mcpType == LTI_TYPE_MCP23017) {
 #endif
 #ifdef MCP23017
 
        // Prepare header in Wire buffer for 4 bytes
-       Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+       Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
        Wire.write(MCP23017_GPIOB);
    
     // BURST SPEED, OH MY GOD
@@ -612,7 +610,7 @@ void LiquidTWI2::send(uint8_t value, uint8_t mode) {
 
 #endif // MCP23017
 
-#if defined(MCP23017)&&defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
   else {
 #endif
@@ -627,7 +625,7 @@ void LiquidTWI2::send(uint8_t value, uint8_t mode) {
     // Data pin 7 = 6
 
     // Build header in Wire buffer
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23008_ADDRESS | _i2cAddr);
     wiresend(MCP23008_GPIO);
 
     byte buf;
@@ -653,7 +651,8 @@ low now; LCD crunches these 4 bits.
     while(Wire.endTransmission()); // send all 4 bytes with header and close
 
 #endif // MCP23008
-#if defined(MCP23017)&& defined(MCP23008)
+
+#if defined(MCP23017) && defined(MCP23008)
   }
 #endif
 }
@@ -661,12 +660,12 @@ low now; LCD crunches these 4 bits.
 #ifdef MCP23017
 void LiquidTWI2::burstBits16(uint16_t value) {
   // we use this to burst bits to the GPIO chip whenever we need to. avoids repetitive code.
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(MCP23017_GPIOA);
   wiresend(value & 0xFF); // send A bits
   while(Wire.endTransmission());
 
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(MCP23017_GPIOB);
   wiresend(value >> 8);   // send B bits
   while(Wire.endTransmission());
@@ -674,16 +673,17 @@ void LiquidTWI2::burstBits16(uint16_t value) {
 
 void LiquidTWI2::burstBits8b(uint8_t value) {
   // we use this to burst bits to the GPIO chip whenever we need to. avoids repetitive code.
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(MCP23017_GPIOB);
   wiresend(value); // last bits are crunched, we're done.
   while(Wire.endTransmission());
 }
 #endif // MCP23017
+
 #ifdef MCP23008
 void LiquidTWI2::burstBits8(uint8_t value) {
   // we use this to burst bits to the GPIO chip whenever we need to. avoids repetitive code.
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23008_ADDRESS | _i2cAddr);
   wiresend(MCP23008_GPIO);
   wiresend(value); // last bits are crunched, we're done.
   while(Wire.endTransmission());
@@ -694,23 +694,19 @@ void LiquidTWI2::burstBits8(uint8_t value) {
 //direct access to the registers for interrupt setting and reading, also the tone function using buzzer pin
 uint8_t LiquidTWI2::readRegister(uint8_t reg) {
   // read a register
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(reg);	
-  Wire.requestFrom(_i2cAddr  | _i2cAddr, 1);
+  Wire.requestFrom(MCP23008_ADDRESS | _i2cAddr, 1);
   Wire.endTransmission();
   return wirerecv();
 }
 
 //set registers
 void LiquidTWI2::setRegister(uint8_t reg, uint8_t value) {
-    Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
     wiresend(reg);
     wiresend(value);
     Wire.endTransmission();
-}
-
-void LiquidTWI2::setClock(uint32_t frequ) {
-  Wire.setClock(frequ);
 }
 
 //cycle the buzzer pin at a certain frequency (hz) for a certain duration (ms) 
@@ -722,9 +718,9 @@ void LiquidTWI2::buzz(long duration, uint16_t freq) {
   int currentRegister = 0;
 
   // read gpio register
-  Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+  Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
   wiresend(MCP23017_GPIOA);	
-  Wire.requestFrom(_i2cAddr  | _i2cAddr, 1);
+  Wire.requestFrom(MCP23017_ADDRESS | _i2cAddr, 1);
   Wire.endTransmission();
   currentRegister = wirerecv();
   
@@ -735,12 +731,12 @@ void LiquidTWI2::buzz(long duration, uint16_t freq) {
   while (cycles-- > 0)
   {
     ontime = micros();
-        Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+        Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
         wiresend(MCP23017_GPIOA);
         wiresend(currentRegister |= M17_BIT_BZ);
         while(Wire.endTransmission());
     while((long)(ontime + (cycletime/2) - micros()) > 0);
-        Wire.beginTransmission(_i2cAddr  | _i2cAddr);
+        Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
         wiresend(MCP23017_GPIOA);
         wiresend(currentRegister &= ~M17_BIT_BZ);
         while(Wire.endTransmission());
@@ -748,3 +744,7 @@ void LiquidTWI2::buzz(long duration, uint16_t freq) {
    }
 }
 #endif //MCP23017
+
+void LiquidTWI2::setClock(uint32_t frequ) {
+  Wire.setClock(frequ);
+}
