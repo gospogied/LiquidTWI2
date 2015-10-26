@@ -8,7 +8,7 @@
    logic gleaned from Adafruit RGB LCD Shield library
    Panelolu2 support by Tony Lock / http://blog.think3dprint3d.com
    enhancements by Nick Sayer / https://github.com/nsayer
-   enhancements by Eigil Oedegaard, October 2015 for higher throuhput https://github.com/justmyopinion
+   enhancements by Eigil Oedegaard, October 2015 for higher throughput https://github.com/justmyopinion
    
   Compatible with Adafruit I2C LCD backpack (MCP23008) and
   Adafruit RGB LCD Shield
