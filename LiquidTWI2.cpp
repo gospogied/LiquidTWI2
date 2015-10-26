@@ -1,4 +1,4 @@
-#include "LiquidTWI2_Wire.h"
+#include "LiquidTWI2.h"
 
 /*
   LiquidTWI2 High Performance i2c LCD driver for MCP23008 & MCP23017
