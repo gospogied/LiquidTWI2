@@ -22,7 +22,7 @@ For more information see
  http://blog.think3dprint3d.com/2012/12/mcp23017-i2c.html
 
   Version 1.2.7-beta
-
+  This branch has been rewritten for use with I2C lib
   Changelog:
   * 1.2.7-beta 20151025 EO 
   driver is rewritten for better throughput with Wire Library
