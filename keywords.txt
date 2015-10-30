@@ -36,6 +36,7 @@ readButtons     KEYWORD2
 setRegister	KEYWORD2
 buzz      KEYWORD2
 readRegister     KEYWORD2
+setClock    KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
