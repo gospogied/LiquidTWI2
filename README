@@ -2,6 +2,9 @@ LiquidTWI2
 ==========
 
 A lean, high speed I2C LCD Library for Arduino, which supports MCP23008 (Adafruit LCD Backpack) and MCP23017 (Adafruit RGB LCD Shield)
+This version was optimized for use with I2C library (https://github.com/DSSCircuits/I2C-Master-Library)
+
+optimized  by Eigil Oedegaard, October 2015 for a higher throughput with I2C library  https://github.com/justmyopinion/
 
 hacked by Sam C. Lin / http://www.lincomatic.com
 from 
