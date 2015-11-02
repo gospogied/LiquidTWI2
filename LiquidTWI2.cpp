@@ -76,6 +76,9 @@ uint8_t res;
 return res;
 }
 
+void LiquidTWI2::setClock(uint32_t frequ) {
+  I2c.setClock(frequ);
+}
 
 // When the display powers up, it is configured as follows:
 //
@@ -137,8 +140,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     I2c.write((uint8_t)_i2cAddr, (uint8_t)MCP23017_IOCONB_def, (uint8_t)MCP23017_SEQOP);          
     I2c.end();
 
-  delay(5);
-
+    delay(5);
 
     // now set up input/output on lower pins
     I2c.write((uint8_t)_i2cAddr, (uint8_t)MCP23017_IODIRA, (uint8_t)0x1F); // output except 5 buttons input
@@ -178,7 +180,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif 
 #endif // MCP23017
 
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   }
   else { // MCP23008
 #endif
@@ -260,7 +262,7 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   //  of the HD44780 datasheet - (kch)
   //-----
   
-#if defined(MCP23017)&& defined(MCP23008)
+#if defined(MCP23017) && defined(MCP23008)
   if (_mcpType == LTI_TYPE_MCP23017) {
 #endif // defined(MCP23017)&& defined(MCP23008)
 
@@ -723,6 +725,3 @@ void LiquidTWI2::buzz(long duration, uint16_t freq) {
 }
 #endif //MCP23017
 
-void LiquidTWI2::setClock(uint32_t frequ) {
-  I2c.setClock(frequ);
-}
