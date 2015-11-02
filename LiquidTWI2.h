@@ -5,7 +5,7 @@
 #include "Print.h"
 
 // for memory-constrained projects, comment out the MCP230xx that doesn't apply
-#define MCP23017 // Adafruit RGB LCD (PANELOLU2 is now supported without additional define)
+#define MCP23017     // Adafruit RGB LCD (PANELOLU2 is now supported without additional define)
 //#define MCP23008   // Adafruit I2C Backpack
 
 // for setMCPType()
@@ -18,11 +18,11 @@
 // if the device isn't detected in begin() then we won't try to talk to the
 // device in any of the other functions... this allows you to compile the
 // code w/o an LCD installed, and not get hung in the write functions
-#define DETECT_DEVICE // enable device detection code
+//#define DETECT_DEVICE // enable device detection code
 
-#define WIRE_FREQU 100000 // 100000-400000
+#define I2C_FREQU 100000 // 100000-800000
 
-// for setBacklight() with MCP23017
+// for setBacklight() or LED's with MCP23017
 #define OFF 0x0
 #define RED 0x1
 #define YELLOW 0x3
@@ -65,15 +65,15 @@
 #define MCP23008_GPIO 0x09
 #define MCP23008_OLAT 0x0A
 
+//#define TWI2X
+//#ifdef TWI2X
+
+// control register before bankswitch (IOCON.BANK=0) 
 #define MCP23017_ADDRESS 0x20
+#define MCP23017_IOCONB_def 0x0B    // (IOCON)
+#define MCP23017_SEQOP 0xA0  // BANK 1 + SEQOP  switch off auto increment
 
-#define TWI2X
-
-#ifdef TWI2X
-// control register before bankswitch
-#define MCP23017_IOCONB_def 0x0B
-
-// registers after Bankswitch
+// ALL MCP23017 registers after Bankswitch (IOCON.BANK=1)
 #define MCP23017_IODIRA 0x00   // 0x00
 #define MCP23017_IPOLA  0x01   // 0x02
 #define MCP23017_GPINTENA 0x02 // 0x04
@@ -99,7 +99,8 @@
 #define MCP23017_GPIOB 0x19    // 0x13
 #define MCP23017_OLATB 0x1A    // 0x15
 
-#else / default settings with auto increment of registerupdate
+/*
+#else // default settings with no sequ (IOCON.BANK=0) 
 
 // registers
 #define MCP23017_IODIRA 0x00
@@ -127,9 +128,8 @@
 #define MCP23017_GPIOB 0x13
 #define MCP23017_OLATB 0x15
 
-
 #endif
-
+*/
 // commands
 #define LCD_CLEARDISPLAY   0x01
 #define LCD_RETURNHOME     0x02
@@ -170,6 +170,8 @@
 #define LCD_5x10DOTS 0x04
 #define LCD_5x8DOTS 0x00
 
+#define MAX_BUFFER_SIZE 32
+
 class LiquidTWI2 : public Print {
 public:
 	LiquidTWI2(uint8_t i2cAddr,uint8_t detectDevice=0,uint8_t backlightInverted=0);
@@ -194,10 +196,11 @@ public:
 	void rightToLeft();
 	void autoscroll();
 	void noAutoscroll();
+
 	void setBacklight(uint8_t status); 
+
 	void createChar(uint8_t, uint8_t[]);
 	void setCursor(uint8_t, uint8_t); 
-
 #if defined(ARDUINO) && (ARDUINO >= 100) // scl
 	virtual size_t write(uint8_t);
 #else
@@ -206,34 +209,33 @@ public:
 
 	virtual size_t write(uint8_t *, uint8_t );
 	void command(uint8_t);
-#ifdef MCP23017
 	uint8_t readButtons();
-  //check registers
-     uint8_t readRegister(uint8_t);
-  //set registers
-  void setRegister(uint8_t, uint8_t);
-  //make some noise
-     void buzz(long,uint16_t);
-#endif
-	void setMCPType(uint8_t mcptype) {
-#if defined(MCP23017)&& defined(MCP23008)
-	_mcpType = mcptype;
-#endif //defined(MCP23017)&& defined(MCP23008)
-	}
      void setClock(uint32_t);
 
 
-private:
-	void send(uint8_t,uint8_t);
-
 #ifdef MCP23017
-	void burstBits16(uint16_t);
+  //check registers
+  uint8_t readRegister(uint8_t);
+  //set registers
+  void setRegister(uint8_t, uint8_t);
+  //make some noise
+  void buzz(long,uint16_t);
+#endif
+	void setMCPType(uint8_t mcptype) {
+#if defined(MCP23017)&&defined(MCP23008)
+	  _mcpType = mcptype;
+#endif //defined(MCP23017)&&defined(MCP23008)
+	}
+
+private:
+	void send(uint8_t, uint8_t);
+#ifdef MCP23017
 	void burstBits8b(uint8_t);
+	void burstBits8c(uint8_t);
 #endif
 #ifdef MCP23008
 	void burstBits8(uint8_t);
 #endif
-
 	uint8_t _displayfunction;
 	uint8_t _displaycontrol;
 	uint8_t _displaymode;
@@ -246,7 +248,7 @@ private:
 #ifdef MCP23017
 	uint16_t _backlightBits; // only for MCP23017
 #endif
-#if defined(MCP23017)&&defined(MCP23008)
+#if defined(MCP23017)&& defined(MCP23008)
 	uint8_t _mcpType; // LTI_MODE_xx
 #endif
 
