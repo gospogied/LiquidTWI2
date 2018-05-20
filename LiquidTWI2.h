@@ -170,9 +170,11 @@
 #define LCD_5x10DOTS 0x04
 #define LCD_5x8DOTS 0x00
 
-class LiquidTWI2 : public Print {
+#include "Keypad.h"
+
+class LiquidTWI2 : public Print, public Keypad {
 public:
-	LiquidTWI2(uint8_t i2cAddr,uint8_t detectDevice=0,uint8_t backlightInverted=0);
+	LiquidTWI2(char* userKeymap, byte* row, byte* col, byte numRows, byte numCols, uint8_t i2cAddr,uint8_t detectDevice=0,uint8_t backlightInverted=0);
 
 	void begin(uint8_t cols, uint8_t rows,uint8_t charsize = LCD_5x8DOTS);
 

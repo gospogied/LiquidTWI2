@@ -92,7 +92,7 @@ static inline uint8_t wirerecv(void) {
 // for when the sketch calls begin(), except configuring the expander, which
 // is required by any setup.
 
-LiquidTWI2::LiquidTWI2(uint8_t i2cAddr,uint8_t detectDevice, uint8_t backlightInverted) {
+LiquidTWI2::LiquidTWI2(char* userKeymap, byte* row, byte* col, byte numRows, byte numCols, uint8_t i2cAddr,uint8_t detectDevice, uint8_t backlightInverted) : Keypad(userKeymap, row, col, numRows, numCols)  {
   // if detectDevice != 0, set _deviceDetected to 2 to flag that we should
   // scan for it in begin()
 #ifdef DETECT_DEVICE
@@ -142,10 +142,10 @@ void LiquidTWI2::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 #endif
 
     // now set up input/output pins
-    Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
-    wiresend(MCP23017_IODIRA);
-    wiresend(0x1F); // buttons input, all others output
-    result = Wire.endTransmission();
+//     Wire.beginTransmission(MCP23017_ADDRESS | _i2cAddr);
+//     wiresend(MCP23017_IODIRA);
+//     wiresend(0x1F); // buttons input, all others output
+//     result = Wire.endTransmission();
 #ifdef DETECT_DEVICE
     if (result) {
         if (_deviceDetected == 2) {
@@ -518,7 +518,8 @@ uint8_t LiquidTWI2::readButtons(void) {
   Wire.endTransmission();
   
   Wire.requestFrom(MCP23017_ADDRESS | _i2cAddr, 1);
-  return ~wirerecv() & ALL_BUTTON_BITS;
+  return ~wirerecv();
+//   return ~wirerecv() & ALL_BUTTON_BITS;
 }
 #endif // MCP23017
 
